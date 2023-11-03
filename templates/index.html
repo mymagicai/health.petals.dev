@@ -4,223 +4,226 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=1024">
-  <link rel="icon" class="js-site-favicon" type="image/png" href="./static/logo.svg">
-  <title>Petals Health Monitor</title>
+  <link rel="icon" type="image/png" href="./static/logo.png">
+  <title>MyMagic Health Monitor</title>
   <link href="./static/health.css" rel="stylesheet">
 </head>
+
 <body>
 
-<header>
-  <div class="logo">
-    <a target="_blank" href="https://petals.dev"><img src="./static/logo.svg" height="50" class="rot-image"></a>
-  </div>
-  <h1>Petals <span style="font-size: 13pt; color: #aaa;">Health Monitor</span></h1>
-</header>
+  <header>
+    <div>
+      <a href="https://mymagic.ai"><img src="./static/logo.png" height="50"></a>
+    </div>
+    <h1>MyMagic <span style="font-size: 13pt; color: #aaa;">Health Monitor</span></h1>
+  </header>
 
-<main>
+  <main>
 
-{% set state_chars = dict(offline="_", unreachable="✖", joining="●", online="●") %}
-<section>
-  <p>
-    Bootstrap peers:
-    <span class="bootstrap-map">
-      {% for state in bootstrap_states %}<span class="{{ state }}">{{ state_chars[state] }}</span>{% endfor %}
-    </span>
-  </p>
-</section>
+    {% set state_chars = dict(offline="_", unreachable="✖", joining="●", online="●") %}
+    <section>
+      <p>
+        Bootstrap peers:
+        <span class="bootstrap-map">
+          {% for state in bootstrap_states %}<span class="{{ state }}">{{ state_chars[state] }}</span>{% endfor %}
+        </span>
+      </p>
+    </section>
 
-<section>
-  <p>
-    Swarm:
-    <span class="toc">
+    <section>
+      <p>
+        Swarm:
+        <span class="toc">
+          {% for model in model_reports %}
+          <a class="{{ model.state }}" href="#{{ model.short_name }}" title="DHT prefix: {{ model.dht_prefix }}">{{
+            model.short_name }}</a>
+          {% if not loop.last %}<span class="bull">&bull;</span>{% endif %}
+          {% endfor %}
+        </span>
+      </p>
+    </section>
+
+    <!-- <section>
+      <p>
+        Top contributors:
+        <span class="top-contributors">
+          {% for name, num_blocks in top_contributors.most_common(5) %}
+          <span class="entry">
+            <span class="name">
+              {% if name.startswith('http://') or name.startswith('https://') %}
+              <a target="_blank" href="{{ name }}">{{ name.replace('http://', '').replace('https://', '').rstrip('/') |
+                truncate(20, True, '…') }}</a>
+              {% else %}
+              {{ name|truncate(20, True, '…') }}
+              {% endif %}
+            </span>
+            <span class="num-blocks gray">({{ num_blocks }} blocks)</span>
+          </span>
+          {% if not loop.last %}<span class="bull">&bull;</span>{% endif %}
+          {% endfor %}
+        </span>
+      </p>
+    </section> -->
+
     {% for model in model_reports %}
-    <a class="{{ model.state }}" href="#{{ model.short_name }}" title="DHT prefix: {{ model.dht_prefix }}">{{ model.short_name }}</a>
-    {% if not loop.last %}<span class="bull">&bull;</span>{% endif %}
-    {% endfor %}
-    </span>
-  </p>
-</section>
+    <section id="{{ model.short_name }}">
+      <p>
+        Model
+        <a target="_blank" href="{{ model.repository }}" title="DHT prefix: {{ model.dht_prefix }}">{{ model.name }}</a>
+        (<span class="{{ model.state }}">{{ model.state }}</span>):
+      </p>
 
-<section>
-  <p>
-    Top contributors:
-    <span class="top-contributors">
-    {% for name, num_blocks in top_contributors.most_common(5) %}
-    <span class="entry">
-      <span class="name">
-        {% if name.startswith('http://') or name.startswith('https://') %}
-        <a target="_blank" href="{{ name }}">{{ name.replace('http://', '').replace('https://', '').rstrip('/') | truncate(20, True, '…') }}</a>
-        {% else %}
-        {{ name|truncate(20, True, '…') }}
-        {% endif %}
-      </span>
-      <span class="num-blocks gray">({{ num_blocks }} blocks)</span>
-    </span>
-    {% if not loop.last %}<span class="bull">&bull;</span>{% endif %}
-    {% endfor %}
-    </span>
-  </p>
-</section>
-
-{% for model in model_reports %}
-<section id="{{ model.short_name }}">
-  <p>
-    Model
-    <a target="_blank" href="{{ model.repository }}" title="DHT prefix: {{ model.dht_prefix }}">{{ model.name }}</a>
-    (<span class="{{ model.state }}">{{ model.state }}</span>):
-  </p>
-
-  {% if not model.official %}
-  <p class="hint">This model is <b>not</b> officially supported. Use it at your own risk.</p>
-  {% endif %}
-
-  {% if model.limited %}
-  <p class="hint">
-    This model is supposed to be used by our <a target="_blank" href="https://chat.petals.dev">chatbot app</a> only.
-    We do not provide a public API for this model due to
-    <a target="_blank" href="https://huggingface.co/tiiuae/falcon-180B-chat/blob/main/LICENSE.txt">license</a> restrictions.
-  </p>
-  {% endif %}
-
-  <table class="servers">
-    <thead>
-      <tr>
-        <td>Server ID <a class="show-full-peer-id" href="#">»</a></td>
-        <td>Contributor <a class="explain-public-name" href="#">?</a></td>
-        <td>Version</td>
-        <td>Throughput <a class="toggle-rps-details" href="#">»</a></td>
-        <td class="rps-details" style="display: none;">Inference <a class="explain-compute-rps" href="#">?</a></td>
-        <td class="rps-details" style="display: none;">Forward <a class="explain-compute-rps" href="#">?</a></td>
-        <td class="rps-details" style="display: none;">Network <a class="explain-network-rps" href="#">?</a></td>
-        <td>Precision <a class="explain-precision" href="#">?</a></td>
-        <td>LoRAs <a class="explain-adapters" href="#">?</a></td>
-        <td>Cache <a class="explain-cache" href="#">?</a></td>
-        <td>Avl. <a class="explain-avl" href="#">?</a></td>
-        <td>Pings <a class="explain-pings" href="#">?</a></td>
-        <td class="bm-header" colspan="{{ model.num_blocks + 1 }}">Served blocks</td>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in model.server_rows %}
-      {% set server_info = row.span.server_info %}
-      <tr>
-        <td>
-          <span class="short-peer-id">{{ row.short_peer_id }}</span>
-          <span class="peer-id" style="display: none;">{{ row.peer_id }}</span>
-        </td>
-        <td class="contributor">
-          {% if row.show_public_name and server_info.public_name is not none %}
-          {% if server_info.public_name.startswith('http://') or server_info.public_name.startswith('https://') %}
-          <a target="_blank" href="{{ server_info.public_name }}">{{ server_info.public_name.replace('http://', '').replace('https://', '').rstrip('/') | truncate(20, True, '…') }}</a>
-          {% else %}
-          {{ server_info.public_name|truncate(20, True, '…') }}
-          {% endif %}
-          {% endif %}
-        </td>
-        <td>{% if server_info.version %}{{ server_info.version|truncate(10, True, '…') }}{% else %}&lt; 2.0.0{% endif %}</td>
-        <td>{{ "%.0f" | format(server_info.throughput) }} tok/s</td>
-        <td class="rps-details" style="display: none;">
-          {% if server_info.inference_rps is not none %}{{ "%.0f" | format(server_info.inference_rps) }}{% endif %}
-        </td>
-        <td class="rps-details" style="display: none;">
-          {% if server_info.forward_rps is not none %}{{ "%.0f" | format(server_info.forward_rps) }}{% endif %}
-        </td>
-        <td class="rps-details" style="display: none;">
-          {% if server_info.network_rps is not none %}{{ "%.0f" | format(server_info.network_rps) }}{% endif %}
-        </td>
-        <td>
-          {% if server_info.torch_dtype %}{{ server_info.torch_dtype | replace('float', 'f') }}{% endif %}
-          {% if server_info.quant_type and server_info.quant_type != "none" %}({{ server_info.quant_type }}){% endif %}
-        </td>
-        <td>
-          {% for adapter in row.adapters %}
-          <a target="_blank" href="https://huggingface.co/{{adapter.name}}"">{{ adapter.short_name }}</a>
+      <table class="servers">
+        <thead>
+          <tr>
+            <td>Server ID <a class="show-full-peer-id" href="#">»</a></td>
+            <td>Contributor <a class="explain-public-name" href="#">?</a></td>
+            <td>Version</td>
+            <td>Throughput <a class="toggle-rps-details" href="#">»</a></td>
+            <td class="rps-details" style="display: none;">Inference <a class="explain-compute-rps" href="#">?</a></td>
+            <td class="rps-details" style="display: none;">Forward <a class="explain-compute-rps" href="#">?</a></td>
+            <td class="rps-details" style="display: none;">Network <a class="explain-network-rps" href="#">?</a></td>
+            <td>Precision <a class="explain-precision" href="#">?</a></td>
+            <td>LoRAs <a class="explain-adapters" href="#">?</a></td>
+            <td>Cache <a class="explain-cache" href="#">?</a></td>
+            <td>Avl. <a class="explain-avl" href="#">?</a></td>
+            <td>Pings <a class="explain-pings" href="#">?</a></td>
+            <td class="bm-header" colspan="{{ model.num_blocks + 1 }}">Served blocks</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in model.server_rows %}
+          {% set server_info = row.span.server_info %}
+          <tr>
+            <td>
+              <span class="short-peer-id">{{ row.short_peer_id }}</span>
+              <span class="peer-id" style="display: none;">{{ row.peer_id }}</span>
+            </td>
+            <td class="contributor">
+              {% if row.show_public_name and server_info.public_name is not none %}
+              {% if server_info.public_name.startswith('http://') or server_info.public_name.startswith('https://') %}
+              <a target="_blank" href="{{ server_info.public_name }}">{{ server_info.public_name.replace('http://',
+                '').replace('https://', '').rstrip('/') | truncate(20, True, '…') }}</a>
+              {% else %}
+              {{ server_info.public_name|truncate(20, True, '…') }}
+              {% endif %}
+              {% endif %}
+            </td>
+            <td>{% if server_info.version %}{{ server_info.version|truncate(10, True, '…') }}{% else %}&lt; 2.0.0{%
+              endif %}</td>
+            <td>{{ "%.0f" | format(server_info.throughput) }} tok/s</td>
+            <td class="rps-details" style="display: none;">
+              {% if server_info.inference_rps is not none %}{{ "%.0f" | format(server_info.inference_rps) }}{% endif %}
+            </td>
+            <td class="rps-details" style="display: none;">
+              {% if server_info.forward_rps is not none %}{{ "%.0f" | format(server_info.forward_rps) }}{% endif %}
+            </td>
+            <td class="rps-details" style="display: none;">
+              {% if server_info.network_rps is not none %}{{ "%.0f" | format(server_info.network_rps) }}{% endif %}
+            </td>
+            <td>
+              {% if server_info.torch_dtype %}{{ server_info.torch_dtype | replace('float', 'f') }}{% endif %}
+              {% if server_info.quant_type and server_info.quant_type != "none" %}({{ server_info.quant_type }}){% endif
+              %}
+            </td>
+            <td>
+              {% for adapter in row.adapters %}
+              <a target="_blank" href="https://huggingface.co/{{adapter.name}}"">{{ adapter.short_name }}</a>
           {% endfor %}
         </td>
         <td>{% if server_info.cache_tokens_left is not none %}{{ row.cache_tokens_left_per_block }}{% endif %}</td>
         <td>{% if server_info.using_relay is not none %}{% if server_info.using_relay %}Relay{% else %}Direct{% endif %}{% endif %}</td>
-        <td class="ping" data-peer-id="{{ row.peer_id }}">
-          {% if server_info.next_pings %}
-          <a class="show" href="#">Show</a>
-          <a class="hide" style="display: none;" href="#">Hide</a>
-          {% endif %}
-          {% for source_id, rtt in row.pings_to_me.items() %}
-          <span style="display: none;" class="rtt" data-source-id="{{ source_id }}">
-          {% if rtt <= 5 %}{{ "%.1f ms" | format(rtt * 1000) }}{% else %}&gt; 5 s{% endif %}
-          </span>
+        <td class=" ping" data-peer-id="{{ row.peer_id }}">
+                {% if server_info.next_pings %}
+                <a class="show" href="#">Show</a>
+                <a class="hide" style="display: none;" href="#">Hide</a>
+                {% endif %}
+                {% for source_id, rtt in row.pings_to_me.items() %}
+                <span style="display: none;" class="rtt" data-source-id="{{ source_id }}">
+                  {% if rtt <= 5 %}{{ "%.1f ms" | format(rtt * 1000) }}{% else %}&gt; 5 s{% endif %} </span>
+                    {% endfor %}
+            </td>
+            <td>{{ row.span.start }}:{{ row.span.end }}</td>
+            {% for _ in range(0, row.span.start) %}<td class="bm"> </td>{% endfor %}
+            {% for _ in range(row.span.start, row.span.end) %}<td class="bm {{ row.state }}">{{ state_chars[row.state]
+              }}</td>{% endfor %}
+            {% for _ in range(row.span.end, model.num_blocks) %}<td class="bm"> </td>{% endfor %}
+          </tr>
           {% endfor %}
-        </td>
-        <td>{{ row.span.start }}:{{ row.span.end }}</td>
-        {% for _ in range(0, row.span.start) %}<td class="bm"> </td>{% endfor %}
-        {% for _ in range(row.span.start, row.span.end) %}<td class="bm {{ row.state }}">{{ state_chars[row.state] }}</td>{% endfor %}
-        {% for _ in range(row.span.end, model.num_blocks) %}<td class="bm"> </td>{% endfor %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+        </tbody>
+      </table>
 
-  {% if model.state == "broken" %}
-  <p class="hint">
-    <b>Not enough servers?</b>
-    <a target="_blank" href="https://github.com/bigscience-workshop/petals#connect-your-gpu-and-increase-petals-capacity">Connect your GPU</a>
-    and increase Petals capacity!
-  </p>
-  {% endif %}
-</section>
-{% endfor %}
+    </section>
+    {% endfor %}
 
-<section>
-  <p>Legend:</p>
+    <section>
+      <p>Legend:</p>
 
-  <table class="legend">
-    <thead>
-      <tr><td colspan="2">Status</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-      <tr><td class="online">●</td><td>online</td><td>Up and running</td></tr>
-      <tr><td class="joining">●</td><td>joining</td><td>Loading blocks, joining soon</td></tr>
-      <tr><td class="unreachable">✖</td><td>unreachable</td><td>Unreachable from the Internet, see "Reachability issues" below</td></tr>
-      <tr><td class="offline">_</td><td>offline</td><td>Disconnected a few minutes ago</td></tr>
-    </tbody>
-  </table>
-</section>
+      <table class="legend">
+        <thead>
+          <tr>
+            <td colspan="2">Status</td>
+            <td>Description</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="online">●</td>
+            <td>online</td>
+            <td>Up and running</td>
+          </tr>
+          <tr>
+            <td class="joining">●</td>
+            <td>joining</td>
+            <td>Loading blocks, joining soon</td>
+          </tr>
+          <tr>
+            <td class="unreachable">✖</td>
+            <td>unreachable</td>
+            <td>Unreachable from the Internet, see "Reachability issues" below</td>
+          </tr>
+          <tr>
+            <td class="offline">_</td>
+            <td>offline</td>
+            <td>Disconnected a few minutes ago</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
 
-{% if reachability_issues %}
-<section>
-  <p>Reachability issues:</p>
-  <p class="hint">
-    Servers may be unreachable due to port forwarding/NAT/firewall issues.
-    Normally, they should become reachable in a few minutes, once they join
-    a <a href="https://docs.libp2p.io/concepts/nat/circuit-relay/">libp2p circuit relay</a>.
-    If your server fails to do that, please ask for help
-    in the <b><a target="_blank" href="https://discord.gg/X7DgtxgMhc">#running-a-server</a></b> channel of our Discord.
-  </p>
+    {% if reachability_issues %}
+    <section>
+      <p>Reachability issues:</p>
+      <p class="hint">
+        Servers may be unreachable due to port forwarding/NAT/firewall issues.
+        Normally, they should become reachable in a few minutes, once they join
+        a <a href="https://docs.libp2p.io/concepts/nat/circuit-relay/">libp2p circuit relay</a>.
+      </p>
 
-  <table>
-    <thead>
-      <tr><td>Peer ID</td><td>Error message</td></tr>
-    </thead>
-    <tbody>
-      {% for row in reachability_issues %}
-      <tr>
-        <td>{{ row.peer_id }}</td>
-        <td class="error-message">{{ row.err }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
-{% endif %}
+      <table>
+        <thead>
+          <tr>
+            <td>Peer ID</td>
+            <td>Error message</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in reachability_issues %}
+          <tr>
+            <td>{{ row.peer_id }}</td>
+            <td class="error-message">{{ row.err }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
 
-</main>
+  </main>
 
-<footer>
-  Last updated: {{ last_updated.strftime('%H:%M:%S') }} UTC (update in {{ update_period }} sec).
-  See source code and API docs on <a target="_blank" href="https://github.com/petals-infra/health.petals.dev">GitHub</a>.
-</footer>
-
-<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-<script src="./static/health.js?v=3"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+  <script src="./static/health.js?v=3"></script>
 
 </body>
+
 </html>

@@ -8,29 +8,36 @@ header {
     text-align: center;
 }
 
-.logo {
-  position: relative;
-  top: 15px;
-  display: inline-block;
-  padding-right: 0.75rem;
-}
+/* .logo {
+    position: relative;
+    top: 15px;
+    display: inline-block;
+    padding-right: 0.75rem;
+} */
 
-.rot-image {
+/* .rot-image {
   -webkit-animation:spin 4s linear infinite;
   -moz-animation:spin 4s linear infinite;
   animation:spin 60s linear infinite;
-}
+} */
+
 @-moz-keyframes spin {
-  100% { -moz-transform: rotate(360deg); }
+    100% {
+        -moz-transform: rotate(360deg);
+    }
 }
+
 @-webkit-keyframes spin {
-  100% { -webkit-transform: rotate(360deg); }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
 }
+
 @keyframes spin {
-  100% {
-      -webkit-transform: rotate(360deg);
-      transform:rotate(360deg);
-  }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
 
 header h1 {
@@ -48,7 +55,8 @@ section p {
     font-weight: bold;
 }
 
-.toc, .top-contributors {
+.toc,
+.top-contributors {
     margin-left: 5px;
     font-weight: normal;
 }
@@ -71,14 +79,16 @@ section p {
     text-decoration: none;
 }
 
-.loading, .error {
+.loading,
+.error {
     margin: 150px 0;
     text-align: center;
     font-size: 11pt;
     color: #333;
 }
 
-.loading p, .error p {
+.loading p,
+.error p {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-weight: 400;
 }
@@ -100,11 +110,13 @@ footer {
     font-size: 9pt;
 }
 
-.hint, footer {
+.hint,
+footer {
     margin-left: 15px;
 }
 
-tbody, .bootstrap-map {
+tbody,
+.bootstrap-map {
     font-family: 'Courier', monospace;
     font-size: 8.75pt;
 }
@@ -122,9 +134,9 @@ thead td {
     text-align: center;
 }
 
-td.contributor {
+/* td.contributor {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
+} */
 
 .bm-header {
     text-align: left;
